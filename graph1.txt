@@ -1,0 +1,5 @@
+Building A, Building B, 5
+Building A, Building C, 4
+Building B, Building D, 3
+Building C, Building D, 4
+Building E, Building A, 2
