@@ -1,3 +1,5 @@
+package MST;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -25,6 +27,8 @@ public class Main {
 
         System.out.println("Graph Edges:");
         Tree.graphEdges.forEach(e -> System.out.println(e.start() + " -> " + e.end() + " : " + e.weight()));
+
+        // represent graph via an adajency list
 
     }
 
