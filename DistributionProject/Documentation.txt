@@ -1,0 +1,9 @@
+Data Represenation:
+
+Algorithm Description: Cheapest Path 
+
+Algorithm Description: Allocate For Demand
+
+Assessment of Correctness: 
+
+Reflection:
