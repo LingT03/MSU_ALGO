@@ -1,9 +1,30 @@
 Data Represenation:
 
-Algorithm Description: Cheapest Path 
+Algorithm Description: Cheapest Path
+
+For this Cheapest Path class I have decided to implement the Dijkstra's algorithm. 
+This algorithm is used to find the shortest path between two nodes in a graph.
+The class has two input paramenters, 'suppliers' and 'transporter'. 
+Both of these two variables are of type collection and represent Vertices and Edges respectively.
+as for the data structure, I have decided to use a priority queue to store the vertices and edges.
+a Hashset<suppliers> is used to store the suppliers and a Hashset<transporter> is used to store the transporters.
+The reason that have opted to use a collection for the vertices and edges is because they are both unique and 
+therefore a collection is the best data structure to use.
+
 
 Algorithm Description: Allocate For Demand
 
 Assessment of Correctness: 
 
 Reflection:
+
+During the process of working on this assignement, I learned a lot Ford Fulkerson and was able to implement it to the best of
+my understanding.
+
+because of the nature of this assignment I was able to understanding the concept of graph algorithms and how they work in real world 
+situations. 
+
+I also learned about the different types of graph algorithms and how to implement them.
+
+Additionally, in this assingment writing tests for cheapestPath and allocateForDemand was a bit challenging, however I found
+writing unit tests gave me a better understanding of how the algorithms work.

@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+
 /**
  * A supplier may be a manufacturer, distributor, or depot.
  * Supplier attributes include:
@@ -33,7 +34,7 @@ public class Supplier implements java.io.Serializable {
 
     /** Cost of storage at supplier's location. */
     private int storageCost;
-    
+
     /**
      * Direct demand at this supplier's location.
      * If direct demand == 0, then is considered a depot.
@@ -46,7 +47,7 @@ public class Supplier implements java.io.Serializable {
 
     /** Maximum amount of inventory that can be held. */
     private int maxCapacity;
-    
+
     /**
      * Surplus, defined as (inventory - demand).
      * If positive, surplus represents the number of
@@ -74,17 +75,18 @@ public class Supplier implements java.io.Serializable {
      * Fully-parameterized supplier constructor.
      * Note that surplus is automatically calculated as the
      * difference between inventory and demand.
-     * @param name the name of this supplier
-     * @param cost the storage cost per unit stored
-     * @param demand the expected demand at this distributing supplier
+     * 
+     * @param name      the name of this supplier
+     * @param cost      the storage cost per unit stored
+     * @param demand    the expected demand at this distributing supplier
      * @param inventory the actual inventory at this supplier
-     * @param capacity the maximum capacity at this supplier
+     * @param capacity  the maximum capacity at this supplier
      */
     public Supplier(String name,
-                    int cost,
-                    int demand,
-                    int inventory,
-                    int capacity) {
+            int cost,
+            int demand,
+            int inventory,
+            int capacity) {
         this.name = name;
         this.storageCost = cost;
         this.demand = demand;
@@ -100,28 +102,38 @@ public class Supplier implements java.io.Serializable {
     /**
      * @return this supplier's name
      */
-    public String name() { return this.name; }
-    
+    public String name() {
+        return this.name;
+    }
+
     /**
      * @return the cost of storage at this supplier's location
      */
-    public int storageCost() { return this.storageCost; }
+    public int storageCost() {
+        return this.storageCost;
+    }
 
     /**
      * @return the maximum number of units that can be stored
      */
-    public int maxCapacity() { return this.maxCapacity; }
-    
+    public int maxCapacity() {
+        return this.maxCapacity;
+    }
+
     /**
      * @return the demand at this supplier's location.
      */
-    public int demand() { return this.demand; }
-    
+    public int demand() {
+        return this.demand;
+    }
+
     /**
      * @return the current inventory at this supplier's location.
      */
-    public int inventory() { return this.inventory; }
-    
+    public int inventory() {
+        return this.inventory;
+    }
+
     /**
      * @return the surplus inventory at this supplier's location.
      */
@@ -130,12 +142,12 @@ public class Supplier implements java.io.Serializable {
         return this.surplus;
     }
 
-
     /**
      * Compares this supplier to the specified object.
      * The result is <code>true</code> if and only if the argument is
      * not <code>null</code> and is a Supplier object with the same
      * name, storage cost, demand, and inventory values.
+     * 
      * @param anObject the object to compare with this supplier
      * @return <code>true</code> if the given object represents a Supplier
      *         equivalent to this supplier, <code>false</code> otherwise
@@ -156,16 +168,19 @@ public class Supplier implements java.io.Serializable {
 
     /**
      * Returns a hash code value for this supplier.
+     * 
      * @return hash code value for this supplier
      */
     @Override
     public int hashCode() {
-        if (name == null) return 43;
+        if (name == null)
+            return 43;
         return this.name.hashCode();
     }
 
     /**
      * Save this supplier to a file.
+     * 
      * @param filename the name of the file in which to save this supplier;
      *                 if null, uses default file name
      * @return <code>true</code> if successful save;
@@ -185,7 +200,9 @@ public class Supplier implements java.io.Serializable {
             ObjectOutput output = new ObjectOutputStream(buffer);
             try {
                 output.writeObject(this);
-            } finally { output.close(); }
+            } finally {
+                output.close();
+            }
         } catch (IOException ex) {
             System.err.println("Unsuccessful save. " + ex);
             throw ex;
@@ -208,10 +225,12 @@ public class Supplier implements java.io.Serializable {
                     System.err.println("[2] State restore did not match save!");
                     success = false;
                 }
-            } finally { input.close(); }
+            } finally {
+                input.close();
+            }
         } catch (ClassNotFoundException ex) {
             System.err.println(
-                "Unsuccessful deserialization: Class not found. " + ex);
+                    "Unsuccessful deserialization: Class not found. " + ex);
             success = false;
         } catch (IOException ex) {
             System.err.println("Unsuccessful deserialization: " + ex);
@@ -222,18 +241,19 @@ public class Supplier implements java.io.Serializable {
 
     /**
      * Restore this supplier from a file.
-     * <br /><em>Postconditions:</em>
+     * <br />
+     * <em>Postconditions:</em>
      * <blockquote>If successful, previous contents of this supplier have
      * been replaced by the contents of the file.
      * If unsuccessful, content of the supplier is unchanged.</blockquote>
+     * 
      * @param filename the name of the file from which to restore this supplier;
      *                 if null, uses default file name
      * @return <code>true</code> if successful restore;
      *         <code>false</code> otherwise
      * @throws java.io.IOException if unexpected IO error
      */
-    public final boolean restore(final String filename) throws
-    java.io.IOException {
+    public final boolean restore(final String filename) throws java.io.IOException {
         boolean success = false;
         String supplierFileName = filename;
         if (supplierFileName == null) {
@@ -254,7 +274,7 @@ public class Supplier implements java.io.Serializable {
             }
         } catch (ClassNotFoundException ex) {
             System.err.println(
-                "Unsuccessful deserialization: Class not found. " + ex);
+                    "Unsuccessful deserialization: Class not found. " + ex);
             success = false;
         } catch (IOException ex) {
             System.err.println("Unsuccessful deserialization: " + ex);
@@ -262,7 +282,7 @@ public class Supplier implements java.io.Serializable {
         }
         if (restored == null) {
             System.err.println(
-                "Unsuccessful deserialization: restored == null");
+                    "Unsuccessful deserialization: restored == null");
             success = false;
         } else {
             this.name = restored.name;

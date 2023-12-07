@@ -1,34 +1,44 @@
 import java.util.Collection;
-//import java.util.Collections;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.ArrayList;
 
 public class SimpleAllocator {
 
-    // Method to find the cheapest path using Dijkstra's algorithm
-    public static Collection<Transporter> CheapestPath(
+    public static Collection<Transporter> cheapestPath(
             Collection<Supplier> suppliers,
-            Collection<Transporter> transporters) {
+            Collection<Transporter> transporters,
+            Supplier source,
+            Supplier destination) {
 
-        // Priority queue to store the available transporters based on cost
+        // Check if any parameter is null
+        if (suppliers == null || transporters == null || source == null || destination == null) {
+            return Collections.emptyList();
+        }
+
+        // Create the adjacency list
+        Map<Supplier, List<Transporter>> adjacencyList = createAdjacencyList(suppliers, transporters);
+
+        // Priority queue to store transporters based on cost
         PriorityQueue<Transporter> minCostQueue = new PriorityQueue<>(
-                (t1, t2) -> Integer.compare(t1.costPerUnit(), t2.costPerUnit()));
+                Comparator.comparingInt(Transporter::costPerUnit));
 
         // Set to keep track of visited suppliers
-        HashSet<Supplier> visitedSuppliers = new HashSet<>();
+        Set<Supplier> visitedSuppliers = new HashSet<>();
 
         // Collection to store the selected transporters for the cheapest path
         Collection<Transporter> cheapestPath = new HashSet<>();
 
-        // Starting from the manufacturer
-        Supplier manufacturer = getSupplierByName(suppliers, "Manufacturer");
-
-        // Add transporters from the manufacturer to the queue
-        for (Transporter transporter : transporters) {
-            if (transporter.from().equals(manufacturer)) {
-                minCostQueue.add(transporter);
-            }
+        // Add transporters from the source supplier to the queue
+        for (Transporter transporter : adjacencyList.getOrDefault(source, Collections.emptyList())) {
+            minCostQueue.add(transporter);
         }
 
         // Dijkstra's algorithm
@@ -47,69 +57,66 @@ public class SimpleAllocator {
             // Mark the current supplier as visited
             visitedSuppliers.add(currentSupplier);
 
+            // Check if the destination supplier is reached
+            if (currentSupplier.equals(destination)) {
+                break;
+            }
+
             // Add transporters from the current supplier to the queue
-            for (Transporter transporter : transporters) {
-                if (transporter.from().equals(currentSupplier)) {
-                    minCostQueue.add(transporter);
-                }
+            for (Transporter nextTransporter : adjacencyList.getOrDefault(currentSupplier, Collections.emptyList())) {
+                minCostQueue.add(nextTransporter);
             }
         }
 
         return cheapestPath;
     }
 
-    // Method to allocate for demand using Ford Fulkerson algorithm
-    public static Collection<Transporter> AllocateForDemand(
+    public static Map<Supplier, List<Transporter>> createAdjacencyList(
             Collection<Supplier> suppliers,
             Collection<Transporter> transporters) {
 
-        // Collection to store the selected transporters for allocation
+        Map<Supplier, List<Transporter>> adjacencyList = new HashMap<>();
+
+        for (Transporter transporter : transporters) {
+            Supplier fromSupplier = transporter.from();
+            adjacencyList.computeIfAbsent(fromSupplier, k -> new ArrayList<>()).add(transporter);
+        }
+
+        return adjacencyList;
+    }
+
+    public static Collection<Transporter> allocateForDemand(
+            Collection<Supplier> suppliers,
+            Collection<Transporter> transporters) {
+
         Collection<Transporter> allocation = new HashSet<>();
 
-        // Total demand to be satisfied
         int totalDemand = totalDemand(suppliers);
 
-        // Iterate through each supplier
         for (Supplier supplier : suppliers) {
             int supplierDemand = supplier.demand();
             int remainingDemand = supplierDemand;
 
-            // Iterate through transporters to allocate
             for (Transporter transporter : transporters) {
                 Supplier fromSupplier = transporter.from();
-                Supplier toSupplier = transporter.to();
 
-                // Allocate based on remaining demand and transporter capacity
                 if (fromSupplier.equals(supplier) && remainingDemand > 0) {
                     int availableCapacity = transporter.maxCapacity() - transporter.allocation();
                     int allocationAmount = Math.min(remainingDemand, availableCapacity);
 
-                    // Update transporter allocation
                     transporter.setAllocation(transporter.allocation() + allocationAmount);
 
-                    // Update remaining demand
                     remainingDemand -= allocationAmount;
-
-                    // Add transporter to allocation
                     allocation.add(transporter);
                 }
             }
 
-            // Check if the demand has been satisfied
             if (remainingDemand > 0) {
                 System.err.println("Insufficient capacity to satisfy demand for " + supplier.name());
             }
         }
 
         return allocation;
-    }
-
-    // Helper method to get a supplier by name
-    private static Supplier getSupplierByName(Collection<Supplier> suppliers, String name) {
-        return suppliers.stream()
-                .filter(supplier -> supplier.name().equals(name))
-                .findFirst()
-                .orElse(null);
     }
 
     public static int totalDemand(Collection<Supplier> suppliers) {
