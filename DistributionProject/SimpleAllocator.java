@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class SimpleAllocator {
 
@@ -85,38 +87,105 @@ public class SimpleAllocator {
         return adjacencyList;
     }
 
-    public static Collection<Transporter> allocateForDemand(
-            Collection<Supplier> suppliers,
+    public static Collection<Transporter> allocateForDemand(Collection<Supplier> suppliers,
             Collection<Transporter> transporters) {
+        if (suppliers == null || transporters == null) {
+            return Collections.emptyList();
+        }
 
-        Collection<Transporter> allocation = new HashSet<>();
+        // Create a graph representing the flow network
+        Map<String, Map<String, Integer>> graph = new HashMap<>();
+        int totalDemand = 0;
 
-        int totalDemand = totalDemand(suppliers);
-
+        // Add suppliers as sources and calculate total demand
         for (Supplier supplier : suppliers) {
-            int supplierDemand = supplier.demand();
-            int remainingDemand = supplierDemand;
+            graph.put(supplier.name(), new HashMap<>());
+            totalDemand += supplier.demand();
+        }
 
+        // Add transporters as intermediate nodes
+        for (Transporter transporter : transporters) {
+            graph.put(transporter.name(), new HashMap<>());
+        }
+
+        // Add edges from suppliers to transporters with infinite capacity
+        for (Supplier supplier : suppliers) {
             for (Transporter transporter : transporters) {
-                Supplier fromSupplier = transporter.from();
-
-                if (fromSupplier.equals(supplier) && remainingDemand > 0) {
-                    int availableCapacity = transporter.maxCapacity() - transporter.allocation();
-                    int allocationAmount = Math.min(remainingDemand, availableCapacity);
-
-                    transporter.setAllocation(transporter.allocation() + allocationAmount);
-
-                    remainingDemand -= allocationAmount;
-                    allocation.add(transporter);
-                }
-            }
-
-            if (remainingDemand > 0) {
-                System.err.println("Insufficient capacity to satisfy demand for " + supplier.name());
+                graph.get(supplier.name()).put(transporter.name(), Integer.MAX_VALUE);
             }
         }
 
-        return allocation;
+        // Add edges from transporters to destinations with capacity equal to
+        // transporter allocation
+        for (Transporter transporter : transporters) {
+            graph.get(transporter.name()).put(transporter.to().name(), transporter.allocation());
+        }
+
+        // Implement Ford-Fulkerson algorithm
+        Map<String, Map<String, Integer>> residualGraph = new HashMap<>(graph);
+
+        while (true) {
+            Map<String, String> parentMap = new HashMap<>();
+            Queue<String> queue = new LinkedList<>();
+            queue.add(suppliers.iterator().next().name());
+
+            while (!queue.isEmpty()) {
+                String current = queue.poll();
+
+                for (String neighbor : residualGraph.get(current).keySet()) {
+                    if (!parentMap.containsKey(neighbor) && residualGraph.get(current).get(neighbor) > 0) {
+                        parentMap.put(neighbor, current);
+                        queue.add(neighbor);
+                    }
+                }
+            }
+
+            // If there are no augmenting paths, break
+            if (!parentMap.containsKey(transporters.iterator().next().name())) {
+                break;
+            }
+
+            // Find bottleneck capacity in the augmenting path
+            int bottleneck = Integer.MAX_VALUE;
+            String node = transporters.iterator().next().name(); // Target node
+
+            while (parentMap.containsKey(node)) {
+                String parent = parentMap.get(node);
+                bottleneck = Math.min(bottleneck, residualGraph.get(parent).get(node));
+                node = parent;
+            }
+
+            // Update residual capacities
+            node = transporters.iterator().next().name();
+
+            while (parentMap.containsKey(node)) {
+                String parent = parentMap.get(node);
+                residualGraph.get(parent).put(node, residualGraph.get(parent).get(node) - bottleneck);
+                residualGraph.get(node).put(parent, residualGraph.get(node).get(parent) + bottleneck);
+                node = parent;
+            }
+        }
+
+        // Extract allocated transporters
+        List<Transporter> allocatedTransporters = new ArrayList<>();
+
+        for (Transporter transporter : transporters) {
+            int remainingCapacity = residualGraph.get(transporter.name()).get(transporter.to().name());
+
+            if (remainingCapacity < transporter.allocation()) {
+                // The transporter was used in the flow
+                int allocatedAmount = transporter.allocation() - remainingCapacity;
+                allocatedTransporters.add(new Transporter(
+                        transporter.name(),
+                        transporter.from(),
+                        transporter.to(),
+                        transporter.costPerUnit(),
+                        transporter.maxCapacity(),
+                        allocatedAmount));
+            }
+        }
+
+        return allocatedTransporters;
     }
 
     public static int totalDemand(Collection<Supplier> suppliers) {

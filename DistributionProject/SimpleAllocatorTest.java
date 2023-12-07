@@ -190,7 +190,7 @@ public class SimpleAllocatorTest {
     }
 
     @Test
-    void CheapestPathTest() {
+    void cheapestPathTest() {
         Collection<Supplier> suppliers = new HashSet<>();
         Collection<Transporter> transporters = new HashSet<>();
 
@@ -214,6 +214,43 @@ public class SimpleAllocatorTest {
         // Validate the result
         assertEquals(1, result.size()); // Expecting the cheapest path
         assertFalse(result.contains(path2)); // Expecting path2 to be the cheapest path
+    }
+
+    // ...
+
+    @Test
+    public void createAdjacencyListTest() {
+        Collection<Supplier> suppliers = new HashSet<>();
+        Collection<Transporter> transporters = new HashSet<>();
+
+        Supplier supplier1 = new Supplier("Supplier 1", 0, 0, 0, 50);
+        Supplier supplier2 = new Supplier("Supplier 2", 10, 20, 0, 30);
+        Supplier supplier3 = new Supplier("Supplier 3", 5, 5, 0, 40);
+
+        Transporter transporter1 = new Transporter("Transporter 1", supplier1, supplier2, 10, 30, 0);
+        Transporter transporter2 = new Transporter("Transporter 2", supplier2, supplier3, 15, 20, 0);
+        Transporter transporter3 = new Transporter("Transporter 3", supplier3, supplier1, 5, 40, 0);
+
+        suppliers.add(supplier1);
+        suppliers.add(supplier2);
+        suppliers.add(supplier3);
+
+        transporters.add(transporter1);
+        transporters.add(transporter2);
+        transporters.add(transporter3);
+
+        Map<Supplier, List<Transporter>> adjacencyList = SimpleAllocator.createAdjacencyList(suppliers, transporters);
+
+        // Validate the adjacency list
+        assertEquals(3, adjacencyList.size()); // Expecting 3 suppliers in the adjacency list
+
+        List<Transporter> supplier1Transporters = adjacencyList.get(supplier1);
+        assertEquals(1, supplier1Transporters.size()); // Expecting 1 transporter for supplier1
+        assertTrue(supplier1Transporters.contains(transporter1)); // Expecting transporter1 in the list
+
+        List<Transporter> supplier2Transporters = adjacencyList.get(supplier2);
+        assertEquals(1, supplier2Transporters.size()); // Expecting 1 transporter for supplier2
+        assertTrue(supplier2Transporters.contains(transporter2));
     }
 
     @Test
@@ -319,21 +356,14 @@ public class SimpleAllocatorTest {
 
         int totalAmountShipped = SimpleAllocator.totalAmountShipped(transporters);
 
-        transporter1.setAllocation(10);
+        transporter1.setAllocation(30);
         transporter2.setAllocation(15);
-        transporter3.setAllocation(5);
+        transporter3.setAllocation(4);
 
         assertEquals(0, totalAmountShipped); // Expecting total amount shipped to be 0
         totalAmountShipped = SimpleAllocator.totalAmountShipped(transporters);
 
-        assertEquals(30, totalAmountShipped); // Expecting total amount shipped to be 30
-        totalAmountShipped = SimpleAllocator.totalAmountShipped(transporters);
-
-        assertEquals(30, totalAmountShipped); // Expecting total amount shipped to be 45
-        totalAmountShipped = SimpleAllocator.totalAmountShipped(transporters);
-
-        assertEquals(50, totalAmountShipped); // Expecting total amount shipped to be 50
-
+        assertEquals(49, totalAmountShipped); // Expecting total amount shipped to be 30
     }
 
     @Test
@@ -344,36 +374,46 @@ public class SimpleAllocatorTest {
         Transporter transporter2 = new Transporter("Transporter 2", null, null, 15, 20, 0);
         Transporter transporter3 = new Transporter("Transporter 3", null, null, 5, 40, 0);
 
+        int totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
+
+        transporter1.setAllocation(10);
+        transporter2.setAllocation(20);
+        transporter3.setAllocation(5);
+
+        assertEquals(0, totalTransporterCost); // Expecting total transporter cost to be 0
+
+        transporters.add(transporter1);
+        totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
+        assertEquals(100, totalTransporterCost); // Expecting total transporter cost to be 100 (10*10)
+
+        transporters.add(transporter2);
+        totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
+        assertEquals(400, totalTransporterCost); // Expecting total transporter cost to be 400 (t1 + (20*15))
+
+        transporters.add(transporter3);
+        totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
+        assertEquals(425, totalTransporterCost); // Expecting total transporter cost to be 700 (t2 + (5*5))
+
+    }
+
+    @Test
+    public void displayAllocationsTest() {
+        // Create a test scenario with transporters
+        Collection<Transporter> transporters = new HashSet<>();
+
+        Transporter transporter1 = new Transporter("Transporter 1", null, null, 10, 0, 10);
+        Transporter transporter2 = new Transporter("Transporter 2", null, null, 20, 0, 20);
+        Transporter transporter3 = new Transporter("Transporter 3", null, null, 30, 0, 30);
+
         transporters.add(transporter1);
         transporters.add(transporter2);
         transporters.add(transporter3);
 
-        int totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
+        // Test the displayAllocations method
+        String result = SimpleAllocator.displayAllocations(transporters);
 
-        transporter1.setAllocation(10);
-        transporter2.setAllocation(15);
-        transporter3.setAllocation(5);
-
-        assertEquals(0, totalTransporterCost); // Expecting total transporter cost to be 0
-        totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
-
-        assertEquals(300, totalTransporterCost); // Expecting total transporter cost to be 300
-        totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
-
-        assertEquals(500, totalTransporterCost); // Expecting total transporter cost to be 500
-        totalTransporterCost = SimpleAllocator.totalTransporterCost(transporters);
-
-        assertEquals(700, totalTransporterCost); // Expecting total transporter cost to be 700
-
+        // Validate the result
+        String expected = "Transporter 1: 0 $10\nTransporter 2: 0 $20\nTransporter 3: 0 $30";
+        assertEquals(expected, result);
     }
-
-    /**
-     * Demonstrate printing of string produced by displayAllocations.
-     * Cannot test for full string because order is not specified.
-     */
-    @Test
-    public void displayAllocationsTest() {
-
-    }
-
 }

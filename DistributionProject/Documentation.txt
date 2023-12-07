@@ -1,30 +1,64 @@
-Data Represenation:
+!Data Represenation:!
 
-Algorithm Description: Cheapest Path
+In this assignment I have opted to represent the suppliers and transporters as a graph through the use of Adjacency Lists.
+the reason I have chosen to use Adjacency Lists is because they are more efficient than Adjacency Matrices, because of the benefits
+when it comes to graphs, which is the case for this assignment for both methods.
+additionally, I have also used a priority queue to store the vertices and edges of transporters to ensure that the Cheapest Path 
+algorithm explroes paths with the lowest cost first. 
+
+
+!Algorithm Description: Cheapest Path!
 
 For this Cheapest Path class I have decided to implement the Dijkstra's algorithm. 
 This algorithm is used to find the shortest path between two nodes in a graph.
-The class has two input paramenters, 'suppliers' and 'transporter'. 
-Both of these two variables are of type collection and represent Vertices and Edges respectively.
-as for the data structure, I have decided to use a priority queue to store the vertices and edges.
-a Hashset<suppliers> is used to store the suppliers and a Hashset<transporter> is used to store the transporters.
-The reason that have opted to use a collection for the vertices and edges is because they are both unique and 
-therefore a collection is the best data structure to use.
+The class has two input paramenters, 'suppliers' and 'transporter' as well as the supplier souce and destination.
+the algorithm works by creating an Adjacency List to represent the relationship between the suppliers and transporters.
+As mentioned previously a priority queue is used to store transporters based on cost, as well as a set to keep track of visited
+suppliers and a collection of transporters to keep track of the cheapest path.
+As for the alorithm itself, I referenced many materials both the textbook, youtube videos, and generative AI to understand how the algorithm works. 
+The algorithm works by picking the minimum cost from teh priority queue and adding it to the cheapest path collection. 
+if the supplier has been visited, it will be skipped. 
+Then the algorithm checks if the destination is reached, if not it will continue to explore the cheapest path.
+This process will continue until the the cheapest path is discovered. 
 
 
-Algorithm Description: Allocate For Demand
+!Algorithm Description: Allocate For Demand!
 
-Assessment of Correctness: 
+For this method, although I was not confident in my understanding of the Ford Fulkerson algorithm, I decided to implement it.
+The reason I chose to implement this algorithm is because it is used to find the maximum flow in a network, which in this case 
+is also the demand of each supplier. This method takes two parameters, 1) a colletion of supplier objects and 2) a collection of
+transporter objects. in this method we will also be using an Adjacency List to represent the relationship between the suppliers. 
+we initialize the flow to 0 and the residual graph to the original graph. Since the core of the Ford Fulkerson algorithm Depth First Search,
+we run a while loop until the queue of suppliers the linkedlist is empty. The algorithm iteratively finds augmenting paths 
+(paths with available capacity) using BFS and updates the flow until no more augmenting paths can be found. 
+The final result is the maximum flow in the network.
 
-Reflection:
 
-During the process of working on this assignement, I learned a lot Ford Fulkerson and was able to implement it to the best of
-my understanding.
+!Assessment of Correctness:!
 
-because of the nature of this assignment I was able to understanding the concept of graph algorithms and how they work in real world 
-situations. 
+The test that I have based my devlopment begins by initializing two sets (suppliers and transporters) which are initialized to 
+represent their respective network. Then two suppliers are initialized to represent the source and destination. 
+three transporters are then initialized to represent the transporters in the network.
+In the test execution, the cheapest path is found by invoking the cheapestPath method with the before mentioned parameters.
+The result of the following test is asserted to be equal to the expected result. which it passes. 
 
-I also learned about the different types of graph algorithms and how to implement them.
+Assuming that the tests from allocator.java can also be used to test for simpleallocator.java I would assume that the Dykstra's algorithm
+that I have implemented is correct. However, I am weary of the results since in this unit test, I tested a small sample size of the network.
+
+As for the testing of the allocateForDemand method, I followed a similar porcess however the test was a bit more complex. Because I referenced many
+material to implement the Ford Fulkerson algorithm, I am unsure of it's correctness. The test that I wrote for this method unfortunately does not aid in
+my confidence of the correctness of the algorithm. Although I am certain that i was able to implement princples of the algorithm to the best of my understanding ,
+I am not confident in the correctness of the algorithm.
+
+
+!Reflection:!
+
+During the process of working on this assignement, I learned a lot Ford Fulkerson and although I am not have implemented the alorithm
+to it's full potential, I am glad I was able to learn about it. I also got a chance to revisit Dijkstra's algorithm and I am glad I did. 
+Because of the nature of this assignment, I was able to understanding the concept of graph algorithms and how they work in real world 
+situations. This distrubtion assingment is a real world problem that can be solved using graph algorithms and working on this assignment 
+even though it was challenging, I was able to learn a lot. 
 
 Additionally, in this assingment writing tests for cheapestPath and allocateForDemand was a bit challenging, however I found
-writing unit tests gave me a better understanding of how the algorithms work.
+writing unit tests gave me a better understanding of how the algorithms work. Writing tests was never a strong suit of mine, however 
+this assignment gave me a chance to practice and build my confidence in writing tests.
